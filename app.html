@@ -11,6 +11,37 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 
+    <style>
+        body {
+            padding:1em;
+        }
+
+        .dmxValues{
+
+        }
+
+        .dmxValues .value{
+            display: inline-block;
+            border: 1px solid #67a7e3;
+            width: 34px;
+            height: 34px;
+            position: relative;
+            float:left;
+        }
+
+        .dmxValues .channel{
+            text-align: left;
+            padding-left: 2px;
+            font-size: 11px;
+            color: #666666;
+            background-color: #eaffff;
+        }
+
+        .dmxValuesContainer {
+            margin:1em;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 <script>
@@ -22,25 +53,83 @@
 
     var dmxApp = angular.module('dmxApp', []);
 
-    dmxApp.controller('ButtonsController', function ($scope, $http){
-        function getDMXJson(){
-            var inputText = $scope.dmxValues;
+    var Light = (function(startDMXAddress){
+            this.startDMXAddress = startDMXAddress;
+            this.r = 0;
+            this.g =0;
+            this.b =0;
+
             return {
-                "dmx": inputText
+                start : this.start,
+                end : this.end,
+                setColour : function(red,green,blue){
+                    r = Math.floor(red * 255);
+                    g = Math.floor(green * 255);
+                    b = Math.floor(blue * 255);
+                },
+                getDMXValues : function(){
+                    return [255, r, g, b]
+                }
+            }})();
+
+    dmxApp.controller('ButtonsController', function ($scope, $http){
+        $scope.dmxData = Array.apply(null, new Array(512)).map(Number.prototype.valueOf,0);
+
+        $scope.setLightValues = function(){
+            var dmxPosition = parseInt($scope.startAddress,10) - 1;
+            $scope.dmxData[dmxPosition] = parseInt($scope.main,10);
+            $scope.dmxData[dmxPosition+1] = parseInt($scope.r,10);
+            $scope.dmxData[dmxPosition+2] = parseInt($scope.g,10);
+            $scope.dmxData[dmxPosition+3] = parseInt($scope.b,10);
+
+        };
+        //            var inputText = $scope.dmxValues.split(',').map(function(v) {return parseInt(v,10)});
+
+        function getDMXJson(){
+            return {
+                "dmx": $scope.dmxData
             };
         }
 
-        $scope.sendDmx = function(){
-            $http.post('http://localhost:3456', getDMXJson())
-        }
+        sendDmx = function(){
+            $http.post('http://10.213.3.163:3456', getDMXJson()).then(function(){
+                sendDmx();
+            });
+        };
+        sendDmx();
+
+        $scope.clearAllDmx = function(){
+            $scope.dmxData = Array.apply(null, new Array(512)).map(Number.prototype.valueOf,0);
+        };
     })
 
 
 </script>
 
 <div data-ng-controller="ButtonsController">
-    <input type="text" data-ng-model="dmxValues">
-    <button  data-ng-click="sendDmx()">Send DMX</button>
+    <input type="text" data-ng-model="startAddress" placeholder="startAddress" >
+    <input type="text" data-ng-model="main" placeholder="main" >
+    <input type="text" data-ng-model="r" placeholder="r" >
+    <input type="text" data-ng-model="g" placeholder="g" >
+    <input type="text" data-ng-model="b" placeholder="b" >
+
+    <button  data-ng-click="setLightValues()" class="btn btn-default">Set Light Values</button>
+    <br />
+    <button data-ng-click="clearAllDmx()" class="btn btn-default">Clear All DMX</button>
+    <div>
+        <button data-ng-show="!showCurrentDmx" data-ng-click="showCurrentDmx = !showCurrentDmx" class="btn btn-default">Show Current Dmx</button>
+        <button data-ng-show="showCurrentDmx" data-ng-click="showCurrentDmx = !showCurrentDmx" class="btn btn-default">Hide Current Dmx</button>
+
+        <div class="dmxValuesContainer">
+        <div data-ng-show="showCurrentDmx" data-ng-repeat="dmxChannel in dmxData  track by $index" class="dmxValues">
+            <div class="value">
+                <div class="channel"> {{ $index }}</div>
+                <div> {{ dmxChannel }}</div>
+            </div>
+        </div>
+        </div>
+    </div>
+
 </div>
 
 </body>

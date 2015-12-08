@@ -16,9 +16,9 @@ app.get('/', function (req, res) {
 });
 
 app.post('/', function(request, response){
+    artnet.set(request.body.dmx);
     console.log(request.body.dmx);      // your JSON
     response.send(request.body.dmx);    // echo the result back
-    artnet.set(request.body.dmx);
 });
 
 var server = app.listen(3456, function () {
