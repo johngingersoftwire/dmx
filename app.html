@@ -101,6 +101,30 @@
         $scope.clearAllDmx = function(){
             $scope.dmxData = Array.apply(null, new Array(512)).map(Number.prototype.valueOf,0);
         };
+
+        var crossFadeProgress = 0;
+
+        function parseDec(value){
+            return parseInt(value, 10);
+        }
+
+        $scope.crossFade = function(){
+
+            crossFadeProgress = 0;
+            updateCrossFade();
+        };
+
+        var updatePeriodInMs = 50;
+        function updateCrossFade(){
+            crossFadeProgress +=  1 / (parseDec($scope.crossFadeTimePeriod) * 1000 / updatePeriodInMs) ;
+            if (crossFadeProgress <= 1){
+                var initial = (1 - crossFadeProgress );
+                var final = crossFadeProgress;
+                r = Math.floor(parseDec($scope.rStart) * initial + parseDec($scope.rEnd) * final);
+                $scope.dmxData[2] = r;
+                setTimeout(updateCrossFade, updatePeriodInMs);
+            }
+        }
     })
 
 
@@ -112,9 +136,20 @@
     <input type="text" data-ng-model="r" placeholder="r" >
     <input type="text" data-ng-model="g" placeholder="g" >
     <input type="text" data-ng-model="b" placeholder="b" >
-
     <button  data-ng-click="setLightValues()" class="btn btn-default">Set Light Values</button>
     <br />
+
+    <h4>Crossfade Proof of concept</h4>
+    <h5>Start</h5>
+    <input type="text" data-ng-model="rStart" placeholder="r" >
+    <h5>End</h5>
+    <input type="text" data-ng-model="rEnd" placeholder="r" >
+    <h5>Time Period in seconds</h5>
+    <input type="text" data-ng-model="crossFadeTimePeriod" placeholder="crossFadeTimePeriod" >
+    <button data-ng-click="crossFade()" class="btn btn-default">Crossfade</button>
+
+    <br />
+
     <button data-ng-click="clearAllDmx()" class="btn btn-default">Clear All DMX</button>
     <div>
         <button data-ng-show="!showCurrentDmx" data-ng-click="showCurrentDmx = !showCurrentDmx" class="btn btn-default">Show Current Dmx</button>
