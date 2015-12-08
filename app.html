@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="dmxApp">
+<head>
+    <meta charset="UTF-8">
+    <title>My Really Simple DMX Controller</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+
+</head>
+<body>
+<script>
+    var dmx = [];
+
+    function setDMX(start,intensity){
+        dmx[start - 1] = intensity;
+    }
+
+    var dmxApp = angular.module('dmxApp', []);
+
+    dmxApp.controller('ButtonsController', function ($scope, $http){
+        function getDMXJson(){
+            var inputText = $scope.dmxValues;
+            return {
+                "dmx": inputText
+            };
+        }
+
+        $scope.sendDmx = function(){
+            $http.post('localhost:3000', getDMXJson())
+        }
+    })
+
+
+</script>
+
+<div data-ng-controller="ButtonsController">
+    <input type="text" data-ng-model="dmxValues">
+    <button  data-ng-click="sendDmx()">Send DMX</button>
+</div>
+
+</body>
+</html>
