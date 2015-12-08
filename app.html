@@ -92,7 +92,7 @@
         }
 
         sendDmx = function(){
-            $http.post('http://10.213.3.163:3456', getDMXJson()).then(function(){
+            $http.post('http://localhost:3456', getDMXJson()).then(function(){
                 sendDmx();
             });
         };
@@ -117,12 +117,14 @@
         var updatePeriodInMs = 50;
         function updateCrossFade(){
             crossFadeProgress +=  1 / (parseDec($scope.crossFadeTimePeriod) * 1000 / updatePeriodInMs) ;
-            if (crossFadeProgress <= 1){
+            if (crossFadeProgress < 1){
                 var initial = (1 - crossFadeProgress );
                 var final = crossFadeProgress;
                 r = Math.floor(parseDec($scope.rStart) * initial + parseDec($scope.rEnd) * final);
                 $scope.dmxData[2] = r;
                 setTimeout(updateCrossFade, updatePeriodInMs);
+            } else if (crossFadeProgress >= 1 ){
+                r = Math.floor($scope.rEnd);
             }
         }
     })
