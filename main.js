@@ -5,8 +5,11 @@ var artnetOptions = {
 var artnet = require('artnet')(artnetOptions);
 var express = require('express');
 var app = express();
+var cors = require('cors');
 var bodyParser = require('body-parser');
+
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/', function (req, res) {
     res.send('I am an api!');
@@ -18,7 +21,7 @@ app.post('/', function(request, response){
     artnet.set(request.body.dmx);
 });
 
-var server = app.listen(3000, function () {
+var server = app.listen(3456, function () {
     var host = server.address().address;
     var port = server.address().port;
 
